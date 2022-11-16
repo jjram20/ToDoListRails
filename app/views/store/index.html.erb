@@ -1,0 +1,147 @@
+<div class="container mt-3">
+  <button class="btn btn-primary" id="redirect_to_purchase_made" data-bs-toggle="modal" data-bs-target="#exampleModal">Agregar elemento</button>
+  <button class="btn btn-danger" id="test_post_button" onClick="byeUser()">Prueba post</button>
+  <button class="btn btn-danger" id="download_csv_button">Descargar CSV</button>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <td>Id</td>
+        <td>Artículo</td>
+        <td>Existencias</td>
+        <td>Precio</td>
+        <td>Acciones</td>
+      </tr>
+    </thead>
+    <tbody>
+      <% @items.each do |item| %>
+        <tr>
+          <td>Id</td>
+          <td><%= item.item %></td>
+          <td><%= item.existences %></td>
+          <td><%= item.price %></td>
+          <td>
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick="fillEditForm('<%= item.id %>', '<%= item.item %>', '<%= item.existences %>', '<%= item.price %>')">Editar</button>
+            <button type="button" class="btn btn-danger" onClick="deleteItem('<%= item.id %>')">Eliminar</button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="modal" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva prueba</h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" onClick="clearInputsForm()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Incluir formulario</p>
+        <%= form_with do |form| %>
+          <div class="form-group">
+            <p>
+              <%= form.label :article_form, "Artículo" %>
+              <%= form.text_field :article_form, required: true, id: "form_article" %>
+            </p>
+            <p>
+              <%= form.label :existences_form, "Existencias" %>
+              <%= form.number_field :existences_form, min: 0, step: 1, required: true, id: "form_existences" %>
+            </p>
+            <p>
+              <%= form.label :price_form, "Precio" %>
+              <%= form.number_field :price_form, min: 0, step: 0.01, required: true, id: "form_price" %>
+            </p>
+            <p>
+              <%= form.hidden_field :id_form, id: "form_id" %>
+            </p>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onClick="clickInputsForm()">Cerrar</button>
+              <button type="button" class="btn btn-primary" id="button_add_item" onClick="addItem()">Guardar cambios</button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+</div>
+</div>
+
+<script>
+  function byeUser() {
+    alert(document.getElementById('form_article').value);
+  }
+
+  function addItem() {
+    let name_article = document.getElementById('form_article').value;
+    let existences_article = document.getElementById('form_existences').value;
+    let price_article = document.getElementById('form_price').value;
+    /*let name_article = "Pera";
+    let existences_article = 20;
+    let price_article = 9.50;*/
+    _data = {
+      name_article: name_article,
+      existences_article: existences_article,
+      price_article: price_article
+    }
+    fetch('/addItem', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(_data)})
+        .then(response => response.json())
+        .then(string => console.log(string))
+        .then(window.location.href = '/')
+        .catch(errorMsg => console.log(errorMsg))
+  }
+
+  /*$(document).ready(function(){
+    $('#button_add_item').on('click', () => {
+      dataForm = {
+        name_article: document.getElementById('form_article').value,
+        existences_article: document.getElementById('form_existences').value,
+        price_article: document.getElementById('form_price').value
+      }
+      $.ajax({
+        url: "/addItem",
+        type: "POST",
+        data: dataForm,
+        dataType: 'JSON',
+        success: function(data, textStatus, jqXHR)
+        {
+          console.log(data);
+          if(data["status"] == "200"){
+            console.log(" status function: 200");
+            window.location.href = '/';
+            }
+        }
+      });
+    })
+  })*/
+
+  function deleteItem(id_item) {
+    params = { id: id_item }
+    fetch('/deleteItem', {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)})
+        .then(response => response.json())
+        .then(string => console.log(string))
+        .then(window.location.href = '/')
+        .catch(errorMsg => console.log(errorMsg))
+    }
+
+    function fillEditForm(item_id, item_name, item_existences, item_price) {
+      document.getElementById("form_article").value = item_name;
+      document.getElementById("form_existences").value = item_existences;
+      document.getElementById("form_price").value = item_price;
+      document.getElementById("form_id").value = item_id;
+    }
+
+    function clearInputsForm() {
+      document.getElementById("form_article").value = ``;
+      document.getElementById("form_existences").value = ``;
+      document.getElementById("form_price").value = ``;
+      document.getElementById("form_id").value = ``;
+    }
+</script>
