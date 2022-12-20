@@ -6,17 +6,47 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
 </body>
 
+<% @items.each do |item| %>
+  <input type='checkbox' id='<%= item.item %>' class='graph' name='<%= item.item %>' value='<%= item.item %>' onClick="updateGraph('<%= item.item %>')" checked>
+  <label for='<%= item.item %>'> <%= item.item %> </label>
+  <br>
+<% end %>
+
 <script>
 var xValues = <%= @items.pluck(:item).to_json.html_safe %>;
 var yValues = <%= @items.pluck(:price).to_json.html_safe %>;
+var zValues = <%= @items.pluck(:id).to_json.html_safe %>
 
 new Chart("myChart", {
   type: "bar",
   data: {
     labels: xValues,
     datasets: [{
-      data: yValues
+      data: yValues,
+      label: 'price',
+      borderColor: '#36A2EB',
+      backgroundColor: '#9BD0F5',
+    }, {
+      data: zValues,
+      label: 'id',
+      borderColor: '#FF6384',
+      backgroundColor: '#FFB1C1',
     }]
   },
+  options: {
+    responsive: true,
+    scales: {
+      xAxes: [{
+        stacked: true,
+      }],
+      yAxes: [{
+        stacked: true,
+      }]
+    },
+  },
 });
+
+function updateGraph(field) {
+  alert(field);
+}
 </script>
